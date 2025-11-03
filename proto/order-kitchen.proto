@@ -1,0 +1,26 @@
+syntax = "proto3";
+package proto;
+option go_package = "github.com/Tyulenb/order-kitchen";
+
+service Order {
+    rpc CreateOrder(OrderRequest) returns (OrderResponse) {}
+    rpc GetOrderStatus(OrderId) returns (OrderStatusResponse) {}
+}
+
+message OrderRequest {
+    string DishName = 1;
+}
+
+message OrderResponse {
+    int id = 1;
+}
+
+message OrderId {
+    int id = 1;
+}
+
+message OrderStatusResponse {
+    string id = 1;
+    string status = 2;
+}
+
