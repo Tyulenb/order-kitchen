@@ -22,10 +22,10 @@ func main(){
     defer cancel()
     response, err := client.CreateOrder(ctx, &pb.OrderRequest{Item: "Pork"})
     if err != nil {
-        log.Fatal("could not get: Pork")
+        log.Fatal("could not get: Pork", err)
     }
     log.Println(response)
-    resp, err := client.GetOrderStatus(ctx, &pb.OrderId{Id: "2"})
+    resp, err := client.GetOrderStatus(ctx, &pb.OrderId{Id: response.Id})
     if err != nil {
         log.Fatal("could not get order status 2")
     }
