@@ -3,7 +3,7 @@ package proto;
 option go_package = "github.com/Tyulenb/order-kitchen";
 
 service Order {
-    rpc CreateOrder(OrderRequest) returns (OrderResponse) {}
+    rpc CreateOrder(stream OrderRequest) returns (OrderResponse) {}
     rpc GetOrderStatus(OrderId) returns (OrderStatusResponse) {}
 }
 
@@ -12,11 +12,11 @@ message OrderRequest {
 }
 
 message OrderResponse {
-    int id = 1;
+    string id = 1;
 }
 
 message OrderId {
-    int id = 1;
+    string id = 1;
 }
 
 message OrderStatusResponse {

@@ -20,11 +20,24 @@ func main(){
     client := pb.NewOrderClient(conn)
     ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
     defer cancel()
-    response, err := client.CreateOrder(ctx, &pb.OrderRequest{Item: "Pork"})
+    /////////////////////////////////////////////////////////////////////
+    order := make([]*pb.OrderRequest, 0)
+    order = append(order, &pb.OrderRequest{DishName: "Scrambled eggs"})
+    order = append(order, &pb.OrderRequest{DishName: "Orange juice"})
+    stream, err := client.CreateOrder(ctx)
     if err != nil {
-        log.Fatal("could not get: Pork", err)
+        log.Fatal(err)
     }
-    log.Println(response)
+    for _, v := range order {
+        stream.Send(v)
+    }
+    response, err := stream.CloseAndRecv()
+    if err != nil {
+        log.Fatal(err)
+    }
+    log.Println(response.Id)
+    ///////////////////////////////////////////////////////////////////
+
     resp, err := client.GetOrderStatus(ctx, &pb.OrderId{Id: response.Id})
     if err != nil {
         log.Fatal("could not get order status 2")

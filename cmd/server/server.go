@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"io"
 	"log"
 	"net"
 
@@ -22,23 +23,34 @@ func NewOrder(rbd *redis.Client) *Order {
     }
 }
 
-func (o *Order) CreateOrder(ctx context.Context, req *pb.OrderRequest) (*pb.OrderResponse, error){
-    log.Println("Your order was accepted:", req.Item)
+func (o *Order) CreateOrder(stream pb.Order_CreateOrderServer) error {
     id := uuid.NewString()
-    err := o.rbd.Set(ctx, id, req.Item, 0).Err()
-    if err != nil {
-        return &pb.OrderResponse{}, err
+    ctx := context.Background()
+    dishes := make(map[string]string)
+    for {
+        req, err := stream.Recv()
+        if err == io.EOF {
+            err := o.rbd.HSet(ctx, id, dishes).Err()
+            if err != nil {
+                return err
+            }
+            return stream.SendAndClose(&pb.OrderResponse{Id: id})
+        }
+        if err != nil {
+            return err 
+        }
+        dishes[req.DishName] = "Cooking"
     }
-    return &pb.OrderResponse{Id: id}, nil
 }
 
 func (o *Order) GetOrderStatus(ctx context.Context, id *pb.OrderId) (*pb.OrderStatusResponse, error) {
     log.Println("Status request was accepted:", id.Id)
-    item, err := o.rbd.Get(ctx, id.Id).Result()
+    item, err := o.rbd.HGetAll(ctx, id.Id).Result()
     if err != nil {
         return &pb.OrderStatusResponse{}, err
     }
-    return &pb.OrderStatusResponse{Id: id.Id, Status: item + " is cooking"}, nil
+    log.Println(item)
+    return &pb.OrderStatusResponse{Id: id.Id, Status: "status"}, nil
 }
 
 func main() {

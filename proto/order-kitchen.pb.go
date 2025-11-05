@@ -23,7 +23,7 @@ const (
 
 type OrderRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Item          string                 `protobuf:"bytes,1,opt,name=item,proto3" json:"item,omitempty"`
+	DishName      string                 `protobuf:"bytes,1,opt,name=DishName,proto3" json:"DishName,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -58,9 +58,9 @@ func (*OrderRequest) Descriptor() ([]byte, []int) {
 	return file_proto_order_kitchen_proto_rawDescGZIP(), []int{0}
 }
 
-func (x *OrderRequest) GetItem() string {
+func (x *OrderRequest) GetDishName() string {
 	if x != nil {
-		return x.Item
+		return x.DishName
 	}
 	return ""
 }
@@ -209,18 +209,18 @@ var File_proto_order_kitchen_proto protoreflect.FileDescriptor
 
 const file_proto_order_kitchen_proto_rawDesc = "" +
 	"\n" +
-	"\x19proto/order-kitchen.proto\x12\x05proto\"\"\n" +
-	"\fOrderRequest\x12\x12\n" +
-	"\x04item\x18\x01 \x01(\tR\x04item\"\x1f\n" +
+	"\x19proto/order-kitchen.proto\x12\x05proto\"*\n" +
+	"\fOrderRequest\x12\x1a\n" +
+	"\bDishName\x18\x01 \x01(\tR\bDishName\"\x1f\n" +
 	"\rOrderResponse\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\"\x19\n" +
 	"\aOrderId\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\"=\n" +
 	"\x13OrderStatusResponse\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12\x16\n" +
-	"\x06status\x18\x02 \x01(\tR\x06status2\x83\x01\n" +
-	"\x05Order\x12:\n" +
-	"\vCreateOrder\x12\x13.proto.OrderRequest\x1a\x14.proto.OrderResponse\"\x00\x12>\n" +
+	"\x06status\x18\x02 \x01(\tR\x06status2\x85\x01\n" +
+	"\x05Order\x12<\n" +
+	"\vCreateOrder\x12\x13.proto.OrderRequest\x1a\x14.proto.OrderResponse\"\x00(\x01\x12>\n" +
 	"\x0eGetOrderStatus\x12\x0e.proto.OrderId\x1a\x1a.proto.OrderStatusResponse\"\x00B\"Z github.com/Tyulenb/order-kitchenb\x06proto3"
 
 var (
