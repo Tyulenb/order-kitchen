@@ -10,21 +10,21 @@ import (
 	"google.golang.org/grpc/credentials/insecure"
 )
 
-func main(){
-    conn, err := grpc.NewClient("localhost:50051", grpc.WithTransportCredentials(insecure.NewCredentials()))
-    if err != nil {
-        log.Fatal("did not connect:", err)
-    }
+type PoS struct {
+    client pb.OrderClient
+}
 
-    defer conn.Close()
-    client := pb.NewOrderClient(conn)
+func NewPos(client pb.OrderClient) *PoS {
+    return &PoS{client: client}
+}
+
+func (p *PoS) makeOrder() {
     ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
     defer cancel()
-    /////////////////////////////////////////////////////////////////////
     order := make([]*pb.OrderRequest, 0)
-    order = append(order, &pb.OrderRequest{DishName: "Scrambled eggs"})
-    order = append(order, &pb.OrderRequest{DishName: "Orange juice"})
-    stream, err := client.CreateOrder(ctx)
+    order = append(order, &pb.OrderRequest{DishName: "Scrambled eggs", Amount: 1})
+    order = append(order, &pb.OrderRequest{DishName: "Orange juice", Amount: 1})
+    stream, err := p.client.CreateOrder(ctx)
     if err != nil {
         log.Fatal(err)
     }
@@ -36,11 +36,25 @@ func main(){
         log.Fatal(err)
     }
     log.Println(response.Id)
-    ///////////////////////////////////////////////////////////////////
+}
 
-    resp, err := client.GetOrderStatus(ctx, &pb.OrderId{Id: response.Id})
+func (p *PoS) getOrderStatus(id string) {
+    ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
+    defer cancel()
+    resp, err := p.client.GetOrderStatus(ctx, &pb.OrderId{Id: id})
     if err != nil {
         log.Fatal("could not get order status 2")
     }
     log.Println(resp)
+}
+
+func main(){
+    conn, err := grpc.NewClient("localhost:50051", grpc.WithTransportCredentials(insecure.NewCredentials()))
+    if err != nil {
+        log.Fatal("did not connect:", err)
+    }
+    defer conn.Close()
+    client := pb.NewOrderClient(conn)
+    pos := NewPos(client)
+    pos.makeOrder()
 }

@@ -2,25 +2,27 @@ syntax = "proto3";
 package proto;
 option go_package = "github.com/Tyulenb/order-kitchen";
 
-service Order {
-    rpc CreateOrder(stream OrderRequest) returns (OrderResponse) {}
-    rpc GetOrderStatus(OrderId) returns (OrderStatusResponse) {}
+service Restaurant {
+    rpc CreateOrder(stream OrderRequest) returns (OrderId) {}
+    rpc GetOrderStatus(OrderId) returns (OrderStatus) {}
+    rpc UpdateOrderStatus(OrderId) returns (OrderStatusId) {}
 }
 
 message OrderRequest {
     string DishName = 1;
-}
-
-message OrderResponse {
-    string id = 1;
+    int32 amount = 2;
 }
 
 message OrderId {
     string id = 1;
 }
 
-message OrderStatusResponse {
+message OrderStatusId {
     string id = 1;
     string status = 2;
+}
+
+message OrderStatus {
+    string status = 1;
 }
 

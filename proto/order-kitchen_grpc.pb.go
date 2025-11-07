@@ -19,16 +19,18 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	Order_CreateOrder_FullMethodName    = "/proto.Order/CreateOrder"
-	Order_GetOrderStatus_FullMethodName = "/proto.Order/GetOrderStatus"
+	Order_CreateOrder_FullMethodName       = "/proto.Order/CreateOrder"
+	Order_GetOrderStatus_FullMethodName    = "/proto.Order/GetOrderStatus"
+	Order_UpdateOrderStatus_FullMethodName = "/proto.Order/UpdateOrderStatus"
 )
 
 // OrderClient is the client API for Order service.
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type OrderClient interface {
-	CreateOrder(ctx context.Context, opts ...grpc.CallOption) (grpc.ClientStreamingClient[OrderRequest, OrderResponse], error)
-	GetOrderStatus(ctx context.Context, in *OrderId, opts ...grpc.CallOption) (*OrderStatusResponse, error)
+	CreateOrder(ctx context.Context, opts ...grpc.CallOption) (grpc.ClientStreamingClient[OrderRequest, OrderId], error)
+	GetOrderStatus(ctx context.Context, in *OrderId, opts ...grpc.CallOption) (*OrderStatus, error)
+	UpdateOrderStatus(ctx context.Context, in *OrderId, opts ...grpc.CallOption) (*OrderStatusId, error)
 }
 
 type orderClient struct {
@@ -39,23 +41,33 @@ func NewOrderClient(cc grpc.ClientConnInterface) OrderClient {
 	return &orderClient{cc}
 }
 
-func (c *orderClient) CreateOrder(ctx context.Context, opts ...grpc.CallOption) (grpc.ClientStreamingClient[OrderRequest, OrderResponse], error) {
+func (c *orderClient) CreateOrder(ctx context.Context, opts ...grpc.CallOption) (grpc.ClientStreamingClient[OrderRequest, OrderId], error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	stream, err := c.cc.NewStream(ctx, &Order_ServiceDesc.Streams[0], Order_CreateOrder_FullMethodName, cOpts...)
 	if err != nil {
 		return nil, err
 	}
-	x := &grpc.GenericClientStream[OrderRequest, OrderResponse]{ClientStream: stream}
+	x := &grpc.GenericClientStream[OrderRequest, OrderId]{ClientStream: stream}
 	return x, nil
 }
 
 // This type alias is provided for backwards compatibility with existing code that references the prior non-generic stream type by name.
-type Order_CreateOrderClient = grpc.ClientStreamingClient[OrderRequest, OrderResponse]
+type Order_CreateOrderClient = grpc.ClientStreamingClient[OrderRequest, OrderId]
 
-func (c *orderClient) GetOrderStatus(ctx context.Context, in *OrderId, opts ...grpc.CallOption) (*OrderStatusResponse, error) {
+func (c *orderClient) GetOrderStatus(ctx context.Context, in *OrderId, opts ...grpc.CallOption) (*OrderStatus, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(OrderStatusResponse)
+	out := new(OrderStatus)
 	err := c.cc.Invoke(ctx, Order_GetOrderStatus_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *orderClient) UpdateOrderStatus(ctx context.Context, in *OrderId, opts ...grpc.CallOption) (*OrderStatusId, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(OrderStatusId)
+	err := c.cc.Invoke(ctx, Order_UpdateOrderStatus_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
@@ -66,8 +78,9 @@ func (c *orderClient) GetOrderStatus(ctx context.Context, in *OrderId, opts ...g
 // All implementations must embed UnimplementedOrderServer
 // for forward compatibility.
 type OrderServer interface {
-	CreateOrder(grpc.ClientStreamingServer[OrderRequest, OrderResponse]) error
-	GetOrderStatus(context.Context, *OrderId) (*OrderStatusResponse, error)
+	CreateOrder(grpc.ClientStreamingServer[OrderRequest, OrderId]) error
+	GetOrderStatus(context.Context, *OrderId) (*OrderStatus, error)
+	UpdateOrderStatus(context.Context, *OrderId) (*OrderStatusId, error)
 	mustEmbedUnimplementedOrderServer()
 }
 
@@ -78,11 +91,14 @@ type OrderServer interface {
 // pointer dereference when methods are called.
 type UnimplementedOrderServer struct{}
 
-func (UnimplementedOrderServer) CreateOrder(grpc.ClientStreamingServer[OrderRequest, OrderResponse]) error {
+func (UnimplementedOrderServer) CreateOrder(grpc.ClientStreamingServer[OrderRequest, OrderId]) error {
 	return status.Errorf(codes.Unimplemented, "method CreateOrder not implemented")
 }
-func (UnimplementedOrderServer) GetOrderStatus(context.Context, *OrderId) (*OrderStatusResponse, error) {
+func (UnimplementedOrderServer) GetOrderStatus(context.Context, *OrderId) (*OrderStatus, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetOrderStatus not implemented")
+}
+func (UnimplementedOrderServer) UpdateOrderStatus(context.Context, *OrderId) (*OrderStatusId, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method UpdateOrderStatus not implemented")
 }
 func (UnimplementedOrderServer) mustEmbedUnimplementedOrderServer() {}
 func (UnimplementedOrderServer) testEmbeddedByValue()               {}
@@ -106,11 +122,11 @@ func RegisterOrderServer(s grpc.ServiceRegistrar, srv OrderServer) {
 }
 
 func _Order_CreateOrder_Handler(srv interface{}, stream grpc.ServerStream) error {
-	return srv.(OrderServer).CreateOrder(&grpc.GenericServerStream[OrderRequest, OrderResponse]{ServerStream: stream})
+	return srv.(OrderServer).CreateOrder(&grpc.GenericServerStream[OrderRequest, OrderId]{ServerStream: stream})
 }
 
 // This type alias is provided for backwards compatibility with existing code that references the prior non-generic stream type by name.
-type Order_CreateOrderServer = grpc.ClientStreamingServer[OrderRequest, OrderResponse]
+type Order_CreateOrderServer = grpc.ClientStreamingServer[OrderRequest, OrderId]
 
 func _Order_GetOrderStatus_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(OrderId)
@@ -130,6 +146,24 @@ func _Order_GetOrderStatus_Handler(srv interface{}, ctx context.Context, dec fun
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Order_UpdateOrderStatus_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(OrderId)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(OrderServer).UpdateOrderStatus(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Order_UpdateOrderStatus_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(OrderServer).UpdateOrderStatus(ctx, req.(*OrderId))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // Order_ServiceDesc is the grpc.ServiceDesc for Order service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -140,6 +174,10 @@ var Order_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "GetOrderStatus",
 			Handler:    _Order_GetOrderStatus_Handler,
+		},
+		{
+			MethodName: "UpdateOrderStatus",
+			Handler:    _Order_UpdateOrderStatus_Handler,
 		},
 	},
 	Streams: []grpc.StreamDesc{
