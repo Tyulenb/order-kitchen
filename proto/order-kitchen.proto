@@ -4,6 +4,7 @@ option go_package = "github.com/Tyulenb/order-kitchen";
 
 service Restaurant {
     rpc CreateOrder(stream OrderRequest) returns (OrderId) {}
+    rpc ListOrderStatus(Empty) returns (stream OrderStatusId) {}
     rpc GetOrderStatus(OrderId) returns (OrderStatus) {}
     rpc UpdateOrderStatus(OrderId) returns (OrderStatusId) {}
 }
@@ -26,3 +27,4 @@ message OrderStatus {
     string status = 1;
 }
 
+message Empty {}

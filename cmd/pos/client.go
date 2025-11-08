@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"io"
 	"log"
 	"time"
 
@@ -11,10 +12,10 @@ import (
 )
 
 type PoS struct {
-    client pb.OrderClient
+    client pb.RestaurantClient
 }
 
-func NewPos(client pb.OrderClient) *PoS {
+func NewPos(client pb.RestaurantClient) *PoS {
     return &PoS{client: client}
 }
 
@@ -26,26 +27,33 @@ func (p *PoS) makeOrder() {
     order = append(order, &pb.OrderRequest{DishName: "Orange juice", Amount: 1})
     stream, err := p.client.CreateOrder(ctx)
     if err != nil {
-        log.Fatal(err)
+        log.Fatalf("stream, %v", err)
     }
     for _, v := range order {
         stream.Send(v)
     }
     response, err := stream.CloseAndRecv()
     if err != nil {
-        log.Fatal(err)
+        log.Fatalf("Close stream, %v", err)
     }
     log.Println(response.Id)
 }
 
-func (p *PoS) getOrderStatus(id string) {
+func (p *PoS) listOrderStatus() {
     ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
     defer cancel()
-    resp, err := p.client.GetOrderStatus(ctx, &pb.OrderId{Id: id})
+    stream, err := p.client.ListOrderStatus(ctx, &pb.Empty{})
     if err != nil {
-        log.Fatal("could not get order status 2")
+        log.Fatalf("listOrderStatus, open stream, %v", err)
+        return
     }
-    log.Println(resp)
+    for {
+        statusId, err := stream.Recv()
+        if err == io.EOF {
+            break
+        }
+        log.Println(statusId.Id, statusId.Status)
+    }
 }
 
 func main(){
@@ -54,7 +62,8 @@ func main(){
         log.Fatal("did not connect:", err)
     }
     defer conn.Close()
-    client := pb.NewOrderClient(conn)
+    client := pb.NewRestaurantClient(conn)
     pos := NewPos(client)
     pos.makeOrder()
+    pos.listOrderStatus()
 }

@@ -213,6 +213,42 @@ func (x *OrderStatus) GetStatus() string {
 	return ""
 }
 
+type Empty struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *Empty) Reset() {
+	*x = Empty{}
+	mi := &file_proto_order_kitchen_proto_msgTypes[4]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *Empty) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*Empty) ProtoMessage() {}
+
+func (x *Empty) ProtoReflect() protoreflect.Message {
+	mi := &file_proto_order_kitchen_proto_msgTypes[4]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use Empty.ProtoReflect.Descriptor instead.
+func (*Empty) Descriptor() ([]byte, []int) {
+	return file_proto_order_kitchen_proto_rawDescGZIP(), []int{4}
+}
+
 var File_proto_order_kitchen_proto protoreflect.FileDescriptor
 
 const file_proto_order_kitchen_proto_rawDesc = "" +
@@ -227,9 +263,12 @@ const file_proto_order_kitchen_proto_rawDesc = "" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12\x16\n" +
 	"\x06status\x18\x02 \x01(\tR\x06status\"%\n" +
 	"\vOrderStatus\x12\x16\n" +
-	"\x06status\x18\x01 \x01(\tR\x06status2\xb4\x01\n" +
-	"\x05Order\x126\n" +
-	"\vCreateOrder\x12\x13.proto.OrderRequest\x1a\x0e.proto.OrderId\"\x00(\x01\x126\n" +
+	"\x06status\x18\x01 \x01(\tR\x06status\"\a\n" +
+	"\x05Empty2\xf4\x01\n" +
+	"\n" +
+	"Restaurant\x126\n" +
+	"\vCreateOrder\x12\x13.proto.OrderRequest\x1a\x0e.proto.OrderId\"\x00(\x01\x129\n" +
+	"\x0fListOrderStatus\x12\f.proto.Empty\x1a\x14.proto.OrderStatusId\"\x000\x01\x126\n" +
 	"\x0eGetOrderStatus\x12\x0e.proto.OrderId\x1a\x12.proto.OrderStatus\"\x00\x12;\n" +
 	"\x11UpdateOrderStatus\x12\x0e.proto.OrderId\x1a\x14.proto.OrderStatusId\"\x00B\"Z github.com/Tyulenb/order-kitchenb\x06proto3"
 
@@ -245,22 +284,25 @@ func file_proto_order_kitchen_proto_rawDescGZIP() []byte {
 	return file_proto_order_kitchen_proto_rawDescData
 }
 
-var file_proto_order_kitchen_proto_msgTypes = make([]protoimpl.MessageInfo, 4)
+var file_proto_order_kitchen_proto_msgTypes = make([]protoimpl.MessageInfo, 5)
 var file_proto_order_kitchen_proto_goTypes = []any{
 	(*OrderRequest)(nil),  // 0: proto.OrderRequest
 	(*OrderId)(nil),       // 1: proto.OrderId
 	(*OrderStatusId)(nil), // 2: proto.OrderStatusId
 	(*OrderStatus)(nil),   // 3: proto.OrderStatus
+	(*Empty)(nil),         // 4: proto.Empty
 }
 var file_proto_order_kitchen_proto_depIdxs = []int32{
-	0, // 0: proto.Order.CreateOrder:input_type -> proto.OrderRequest
-	1, // 1: proto.Order.GetOrderStatus:input_type -> proto.OrderId
-	1, // 2: proto.Order.UpdateOrderStatus:input_type -> proto.OrderId
-	1, // 3: proto.Order.CreateOrder:output_type -> proto.OrderId
-	3, // 4: proto.Order.GetOrderStatus:output_type -> proto.OrderStatus
-	2, // 5: proto.Order.UpdateOrderStatus:output_type -> proto.OrderStatusId
-	3, // [3:6] is the sub-list for method output_type
-	0, // [0:3] is the sub-list for method input_type
+	0, // 0: proto.Restaurant.CreateOrder:input_type -> proto.OrderRequest
+	4, // 1: proto.Restaurant.ListOrderStatus:input_type -> proto.Empty
+	1, // 2: proto.Restaurant.GetOrderStatus:input_type -> proto.OrderId
+	1, // 3: proto.Restaurant.UpdateOrderStatus:input_type -> proto.OrderId
+	1, // 4: proto.Restaurant.CreateOrder:output_type -> proto.OrderId
+	2, // 5: proto.Restaurant.ListOrderStatus:output_type -> proto.OrderStatusId
+	3, // 6: proto.Restaurant.GetOrderStatus:output_type -> proto.OrderStatus
+	2, // 7: proto.Restaurant.UpdateOrderStatus:output_type -> proto.OrderStatusId
+	4, // [4:8] is the sub-list for method output_type
+	0, // [0:4] is the sub-list for method input_type
 	0, // [0:0] is the sub-list for extension type_name
 	0, // [0:0] is the sub-list for extension extendee
 	0, // [0:0] is the sub-list for field type_name
@@ -277,7 +319,7 @@ func file_proto_order_kitchen_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_proto_order_kitchen_proto_rawDesc), len(file_proto_order_kitchen_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   4,
+			NumMessages:   5,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

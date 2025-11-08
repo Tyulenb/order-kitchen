@@ -19,31 +19,33 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	Order_CreateOrder_FullMethodName       = "/proto.Order/CreateOrder"
-	Order_GetOrderStatus_FullMethodName    = "/proto.Order/GetOrderStatus"
-	Order_UpdateOrderStatus_FullMethodName = "/proto.Order/UpdateOrderStatus"
+	Restaurant_CreateOrder_FullMethodName       = "/proto.Restaurant/CreateOrder"
+	Restaurant_ListOrderStatus_FullMethodName   = "/proto.Restaurant/ListOrderStatus"
+	Restaurant_GetOrderStatus_FullMethodName    = "/proto.Restaurant/GetOrderStatus"
+	Restaurant_UpdateOrderStatus_FullMethodName = "/proto.Restaurant/UpdateOrderStatus"
 )
 
-// OrderClient is the client API for Order service.
+// RestaurantClient is the client API for Restaurant service.
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
-type OrderClient interface {
+type RestaurantClient interface {
 	CreateOrder(ctx context.Context, opts ...grpc.CallOption) (grpc.ClientStreamingClient[OrderRequest, OrderId], error)
+	ListOrderStatus(ctx context.Context, in *Empty, opts ...grpc.CallOption) (grpc.ServerStreamingClient[OrderStatusId], error)
 	GetOrderStatus(ctx context.Context, in *OrderId, opts ...grpc.CallOption) (*OrderStatus, error)
 	UpdateOrderStatus(ctx context.Context, in *OrderId, opts ...grpc.CallOption) (*OrderStatusId, error)
 }
 
-type orderClient struct {
+type restaurantClient struct {
 	cc grpc.ClientConnInterface
 }
 
-func NewOrderClient(cc grpc.ClientConnInterface) OrderClient {
-	return &orderClient{cc}
+func NewRestaurantClient(cc grpc.ClientConnInterface) RestaurantClient {
+	return &restaurantClient{cc}
 }
 
-func (c *orderClient) CreateOrder(ctx context.Context, opts ...grpc.CallOption) (grpc.ClientStreamingClient[OrderRequest, OrderId], error) {
+func (c *restaurantClient) CreateOrder(ctx context.Context, opts ...grpc.CallOption) (grpc.ClientStreamingClient[OrderRequest, OrderId], error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	stream, err := c.cc.NewStream(ctx, &Order_ServiceDesc.Streams[0], Order_CreateOrder_FullMethodName, cOpts...)
+	stream, err := c.cc.NewStream(ctx, &Restaurant_ServiceDesc.Streams[0], Restaurant_CreateOrder_FullMethodName, cOpts...)
 	if err != nil {
 		return nil, err
 	}
@@ -52,139 +54,178 @@ func (c *orderClient) CreateOrder(ctx context.Context, opts ...grpc.CallOption) 
 }
 
 // This type alias is provided for backwards compatibility with existing code that references the prior non-generic stream type by name.
-type Order_CreateOrderClient = grpc.ClientStreamingClient[OrderRequest, OrderId]
+type Restaurant_CreateOrderClient = grpc.ClientStreamingClient[OrderRequest, OrderId]
 
-func (c *orderClient) GetOrderStatus(ctx context.Context, in *OrderId, opts ...grpc.CallOption) (*OrderStatus, error) {
+func (c *restaurantClient) ListOrderStatus(ctx context.Context, in *Empty, opts ...grpc.CallOption) (grpc.ServerStreamingClient[OrderStatusId], error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	stream, err := c.cc.NewStream(ctx, &Restaurant_ServiceDesc.Streams[1], Restaurant_ListOrderStatus_FullMethodName, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	x := &grpc.GenericClientStream[Empty, OrderStatusId]{ClientStream: stream}
+	if err := x.ClientStream.SendMsg(in); err != nil {
+		return nil, err
+	}
+	if err := x.ClientStream.CloseSend(); err != nil {
+		return nil, err
+	}
+	return x, nil
+}
+
+// This type alias is provided for backwards compatibility with existing code that references the prior non-generic stream type by name.
+type Restaurant_ListOrderStatusClient = grpc.ServerStreamingClient[OrderStatusId]
+
+func (c *restaurantClient) GetOrderStatus(ctx context.Context, in *OrderId, opts ...grpc.CallOption) (*OrderStatus, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(OrderStatus)
-	err := c.cc.Invoke(ctx, Order_GetOrderStatus_FullMethodName, in, out, cOpts...)
+	err := c.cc.Invoke(ctx, Restaurant_GetOrderStatus_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *orderClient) UpdateOrderStatus(ctx context.Context, in *OrderId, opts ...grpc.CallOption) (*OrderStatusId, error) {
+func (c *restaurantClient) UpdateOrderStatus(ctx context.Context, in *OrderId, opts ...grpc.CallOption) (*OrderStatusId, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(OrderStatusId)
-	err := c.cc.Invoke(ctx, Order_UpdateOrderStatus_FullMethodName, in, out, cOpts...)
+	err := c.cc.Invoke(ctx, Restaurant_UpdateOrderStatus_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-// OrderServer is the server API for Order service.
-// All implementations must embed UnimplementedOrderServer
+// RestaurantServer is the server API for Restaurant service.
+// All implementations must embed UnimplementedRestaurantServer
 // for forward compatibility.
-type OrderServer interface {
+type RestaurantServer interface {
 	CreateOrder(grpc.ClientStreamingServer[OrderRequest, OrderId]) error
+	ListOrderStatus(*Empty, grpc.ServerStreamingServer[OrderStatusId]) error
 	GetOrderStatus(context.Context, *OrderId) (*OrderStatus, error)
 	UpdateOrderStatus(context.Context, *OrderId) (*OrderStatusId, error)
-	mustEmbedUnimplementedOrderServer()
+	mustEmbedUnimplementedRestaurantServer()
 }
 
-// UnimplementedOrderServer must be embedded to have
+// UnimplementedRestaurantServer must be embedded to have
 // forward compatible implementations.
 //
 // NOTE: this should be embedded by value instead of pointer to avoid a nil
 // pointer dereference when methods are called.
-type UnimplementedOrderServer struct{}
+type UnimplementedRestaurantServer struct{}
 
-func (UnimplementedOrderServer) CreateOrder(grpc.ClientStreamingServer[OrderRequest, OrderId]) error {
+func (UnimplementedRestaurantServer) CreateOrder(grpc.ClientStreamingServer[OrderRequest, OrderId]) error {
 	return status.Errorf(codes.Unimplemented, "method CreateOrder not implemented")
 }
-func (UnimplementedOrderServer) GetOrderStatus(context.Context, *OrderId) (*OrderStatus, error) {
+func (UnimplementedRestaurantServer) ListOrderStatus(*Empty, grpc.ServerStreamingServer[OrderStatusId]) error {
+	return status.Errorf(codes.Unimplemented, "method ListOrderStatus not implemented")
+}
+func (UnimplementedRestaurantServer) GetOrderStatus(context.Context, *OrderId) (*OrderStatus, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetOrderStatus not implemented")
 }
-func (UnimplementedOrderServer) UpdateOrderStatus(context.Context, *OrderId) (*OrderStatusId, error) {
+func (UnimplementedRestaurantServer) UpdateOrderStatus(context.Context, *OrderId) (*OrderStatusId, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method UpdateOrderStatus not implemented")
 }
-func (UnimplementedOrderServer) mustEmbedUnimplementedOrderServer() {}
-func (UnimplementedOrderServer) testEmbeddedByValue()               {}
+func (UnimplementedRestaurantServer) mustEmbedUnimplementedRestaurantServer() {}
+func (UnimplementedRestaurantServer) testEmbeddedByValue()                    {}
 
-// UnsafeOrderServer may be embedded to opt out of forward compatibility for this service.
-// Use of this interface is not recommended, as added methods to OrderServer will
+// UnsafeRestaurantServer may be embedded to opt out of forward compatibility for this service.
+// Use of this interface is not recommended, as added methods to RestaurantServer will
 // result in compilation errors.
-type UnsafeOrderServer interface {
-	mustEmbedUnimplementedOrderServer()
+type UnsafeRestaurantServer interface {
+	mustEmbedUnimplementedRestaurantServer()
 }
 
-func RegisterOrderServer(s grpc.ServiceRegistrar, srv OrderServer) {
-	// If the following call pancis, it indicates UnimplementedOrderServer was
+func RegisterRestaurantServer(s grpc.ServiceRegistrar, srv RestaurantServer) {
+	// If the following call pancis, it indicates UnimplementedRestaurantServer was
 	// embedded by pointer and is nil.  This will cause panics if an
 	// unimplemented method is ever invoked, so we test this at initialization
 	// time to prevent it from happening at runtime later due to I/O.
 	if t, ok := srv.(interface{ testEmbeddedByValue() }); ok {
 		t.testEmbeddedByValue()
 	}
-	s.RegisterService(&Order_ServiceDesc, srv)
+	s.RegisterService(&Restaurant_ServiceDesc, srv)
 }
 
-func _Order_CreateOrder_Handler(srv interface{}, stream grpc.ServerStream) error {
-	return srv.(OrderServer).CreateOrder(&grpc.GenericServerStream[OrderRequest, OrderId]{ServerStream: stream})
+func _Restaurant_CreateOrder_Handler(srv interface{}, stream grpc.ServerStream) error {
+	return srv.(RestaurantServer).CreateOrder(&grpc.GenericServerStream[OrderRequest, OrderId]{ServerStream: stream})
 }
 
 // This type alias is provided for backwards compatibility with existing code that references the prior non-generic stream type by name.
-type Order_CreateOrderServer = grpc.ClientStreamingServer[OrderRequest, OrderId]
+type Restaurant_CreateOrderServer = grpc.ClientStreamingServer[OrderRequest, OrderId]
 
-func _Order_GetOrderStatus_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _Restaurant_ListOrderStatus_Handler(srv interface{}, stream grpc.ServerStream) error {
+	m := new(Empty)
+	if err := stream.RecvMsg(m); err != nil {
+		return err
+	}
+	return srv.(RestaurantServer).ListOrderStatus(m, &grpc.GenericServerStream[Empty, OrderStatusId]{ServerStream: stream})
+}
+
+// This type alias is provided for backwards compatibility with existing code that references the prior non-generic stream type by name.
+type Restaurant_ListOrderStatusServer = grpc.ServerStreamingServer[OrderStatusId]
+
+func _Restaurant_GetOrderStatus_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(OrderId)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(OrderServer).GetOrderStatus(ctx, in)
+		return srv.(RestaurantServer).GetOrderStatus(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: Order_GetOrderStatus_FullMethodName,
+		FullMethod: Restaurant_GetOrderStatus_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(OrderServer).GetOrderStatus(ctx, req.(*OrderId))
+		return srv.(RestaurantServer).GetOrderStatus(ctx, req.(*OrderId))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _Order_UpdateOrderStatus_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _Restaurant_UpdateOrderStatus_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(OrderId)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(OrderServer).UpdateOrderStatus(ctx, in)
+		return srv.(RestaurantServer).UpdateOrderStatus(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: Order_UpdateOrderStatus_FullMethodName,
+		FullMethod: Restaurant_UpdateOrderStatus_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(OrderServer).UpdateOrderStatus(ctx, req.(*OrderId))
+		return srv.(RestaurantServer).UpdateOrderStatus(ctx, req.(*OrderId))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-// Order_ServiceDesc is the grpc.ServiceDesc for Order service.
+// Restaurant_ServiceDesc is the grpc.ServiceDesc for Restaurant service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
-var Order_ServiceDesc = grpc.ServiceDesc{
-	ServiceName: "proto.Order",
-	HandlerType: (*OrderServer)(nil),
+var Restaurant_ServiceDesc = grpc.ServiceDesc{
+	ServiceName: "proto.Restaurant",
+	HandlerType: (*RestaurantServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
 			MethodName: "GetOrderStatus",
-			Handler:    _Order_GetOrderStatus_Handler,
+			Handler:    _Restaurant_GetOrderStatus_Handler,
 		},
 		{
 			MethodName: "UpdateOrderStatus",
-			Handler:    _Order_UpdateOrderStatus_Handler,
+			Handler:    _Restaurant_UpdateOrderStatus_Handler,
 		},
 	},
 	Streams: []grpc.StreamDesc{
 		{
 			StreamName:    "CreateOrder",
-			Handler:       _Order_CreateOrder_Handler,
+			Handler:       _Restaurant_CreateOrder_Handler,
 			ClientStreams: true,
+		},
+		{
+			StreamName:    "ListOrderStatus",
+			Handler:       _Restaurant_ListOrderStatus_Handler,
+			ServerStreams: true,
 		},
 	},
 	Metadata: "proto/order-kitchen.proto",

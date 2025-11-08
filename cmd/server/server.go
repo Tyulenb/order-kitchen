@@ -2,9 +2,11 @@ package main
 
 import (
 	"context"
+	"fmt"
 	"io"
 	"log"
 	"net"
+	"strings"
 
 	pb "github.com/Tyulenb/order-kitchen/proto"
 	"github.com/google/uuid"
@@ -12,45 +14,68 @@ import (
 	"google.golang.org/grpc"
 )
 
-type Order struct {
-    pb.UnimplementedOrderServer
+type Restaurant struct {
+    pb.UnimplementedRestaurantServer
     rbd *redis.Client
 }
 
-func NewOrder(rbd *redis.Client) *Order {
-    return &Order{
+func NewRestaurant(rbd *redis.Client) *Restaurant {
+    return &Restaurant{
         rbd: rbd,
     }
 }
 
-func (o *Order) CreateOrder(stream pb.Order_CreateOrderServer) error {
+func (r *Restaurant) CreateOrder(stream pb.Restaurant_CreateOrderServer) error {
     id := uuid.NewString()
     ctx := context.Background()
     dishes := make(map[string]string)
     for {
         req, err := stream.Recv()
         if err == io.EOF {
-            err := o.rbd.HSet(ctx, id, dishes).Err()
+            err := r.rbd.HSet(ctx, "order:"+id, "status", "Is Cooking").Err()
             if err != nil {
                 return err
             }
-            return stream.SendAndClose(&pb.OrderResponse{Id: id})
+            err = r.rbd.HSet(ctx, fmt.Sprintf("order:%s:dishes", id), dishes).Err()
+            if err != nil {
+                return err
+            }
+            return stream.SendAndClose(&pb.OrderId{Id: id})
         }
         if err != nil {
             return err 
         }
-        dishes[req.DishName] = "Cooking"
+        dishes[req.DishName] = string(req.Amount)
     }
 }
 
-func (o *Order) GetOrderStatus(ctx context.Context, id *pb.OrderId) (*pb.OrderStatusResponse, error) {
-    log.Println("Status request was accepted:", id.Id)
-    item, err := o.rbd.HGetAll(ctx, id.Id).Result()
-    if err != nil {
-        return &pb.OrderStatusResponse{}, err
+func (r *Restaurant) ListOrderStatus(empty *pb.Empty, stream pb.Restaurant_ListOrderStatusServer) error {
+    var orders []string
+    var err error
+    var cursor uint64
+    for {
+        var keysFromScan []string
+        keysFromScan, cursor, err = r.rbd.Scan(context.TODO(), cursor, "order:*", 10).Result()
+        if err != nil {
+            return err
+        }
+        orders = append(orders, keysFromScan...)
+        if cursor == 0 {
+            break
+        }
     }
-    log.Println(item)
-    return &pb.OrderStatusResponse{Id: id.Id, Status: "status"}, nil
+    for i := range orders {
+        parts := strings.Split(orders[i], ":")
+        if len(parts) > 2 {
+            continue
+        }
+        status, err := r.rbd.HGet(context.TODO(), orders[i], "status").Result()
+        if err != nil {
+            return err
+        }
+        stream.Send(&pb.OrderStatusId{Id: parts[1], Status: status})
+    }
+    return nil
 }
 
 func main() {
@@ -69,10 +94,11 @@ func main() {
     if err := PingDB(redisdb); err != nil {
         log.Fatalf("Cannot connect to DB: %v", err)
     }
-    order := NewOrder(redisdb)
+    redisdb.FlushDB(context.Background())
 
+    restaurant := NewRestaurant(redisdb)
     grpcServer := grpc.NewServer()
-    pb.RegisterOrderServer(grpcServer, order)
+    pb.RegisterRestaurantServer(grpcServer, restaurant)
     log.Println("Server listening at:", lis.Addr())
     if err := grpcServer.Serve(lis); err != nil {
         log.Fatal(err)
