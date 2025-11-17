@@ -3,13 +3,14 @@ package proto;
 option go_package = "github.com/Tyulenb/order-kitchen";
 
 service Restaurant {
-    rpc CreateOrder(stream OrderRequest) returns (OrderId) {}
+    rpc CreateOrder(stream OrderDishes) returns (OrderId) {}
     rpc ListOrderStatus(Empty) returns (stream OrderStatusId) {}
-    rpc GetOrderStatus(OrderId) returns (OrderStatus) {}
     rpc UpdateOrderStatus(OrderId) returns (OrderStatusId) {}
+    rpc GetLastOrder(Empty) returns (OrderId) {}
+    rpc GetOrderDishes(OrderId) returns (stream OrderDishes) {}
 }
 
-message OrderRequest {
+message OrderDishes {
     string DishName = 1;
     int32 amount = 2;
 }

@@ -6,27 +6,31 @@ import (
 	"io"
 	"log"
 	"net"
+	"strconv"
 	"strings"
 
 	pb "github.com/Tyulenb/order-kitchen/proto"
-	"github.com/google/uuid"
 	"github.com/redis/go-redis/v9"
 	"google.golang.org/grpc"
 )
 
 type Restaurant struct {
+    lastOrder uint //autoincrementing order id
+    orderToCook uint //next to cook order
     pb.UnimplementedRestaurantServer
     rbd *redis.Client
 }
 
 func NewRestaurant(rbd *redis.Client) *Restaurant {
     return &Restaurant{
+        lastOrder: 0,
+        orderToCook: 0,
         rbd: rbd,
     }
 }
 
 func (r *Restaurant) CreateOrder(stream pb.Restaurant_CreateOrderServer) error {
-    id := uuid.NewString()
+    id := strconv.FormatUint(uint64(r.lastOrder), 10)
     ctx := context.Background()
     dishes := make(map[string]string)
     for {
@@ -36,7 +40,7 @@ func (r *Restaurant) CreateOrder(stream pb.Restaurant_CreateOrderServer) error {
             if err != nil {
                 return err
             }
-            err = r.rbd.HSet(ctx, fmt.Sprintf("order:%s:dishes", id), dishes).Err()
+            err = r.rbd.HSet(ctx, fmt.Sprintf("order:%s:dishes", id), dishes, ).Err()
             if err != nil {
                 return err
             }

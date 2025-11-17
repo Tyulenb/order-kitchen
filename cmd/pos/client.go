@@ -22,9 +22,9 @@ func NewPos(client pb.RestaurantClient) *PoS {
 func (p *PoS) makeOrder() {
     ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
     defer cancel()
-    order := make([]*pb.OrderRequest, 0)
-    order = append(order, &pb.OrderRequest{DishName: "Scrambled eggs", Amount: 1})
-    order = append(order, &pb.OrderRequest{DishName: "Orange juice", Amount: 1})
+    order := make([]*pb.OrderDishes, 0)
+    order = append(order, &pb.OrderDishes{DishName: "Scrambled eggs", Amount: 1})
+    order = append(order, &pb.OrderDishes{DishName: "Orange juice", Amount: 1})
     stream, err := p.client.CreateOrder(ctx)
     if err != nil {
         log.Fatalf("stream, %v", err)
