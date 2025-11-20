@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"fmt"
 	"io"
 	"log"
 	"time"
@@ -52,7 +53,48 @@ func (p *PoS) listOrderStatus() {
         if err == io.EOF {
             break
         }
+        if err != nil {
+            log.Fatal(err)
+        }
         log.Println(statusId.Id, statusId.Status)
+    }
+}
+
+func (p *PoS) updateOrderStatus () {
+    ctx := context.Background()
+    r, err := p.client.UpdateOrderStatus(ctx, &pb.OrderStatusId{Id: "1", Status: "Canceled"})
+    if err != nil {
+        log.Fatal(err)
+    }
+    log.Println(r)
+}
+
+func (p *PoS) getLastOrder() {
+    ctx := context.Background()
+    r, err := p.client.GetLastOrder(ctx, &pb.Empty{})
+    if err != nil {
+        log.Fatal(err)
+    }
+    log.Println(r)
+}
+
+func (p *PoS) getOrderDishes() {
+    ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
+    defer cancel()
+    stream, err := p.client.GetOrderDishes(ctx, &pb.OrderId{Id: "1"})
+    if err != nil {
+        log.Fatal(err)
+    }
+    for {
+        orderDish, err := stream.Recv()
+        if err == io.EOF {
+            fmt.Println("End dishes sream")
+            break
+        }
+        if err != nil {
+            log.Fatal(err)
+        }
+        log.Println(orderDish)
     }
 }
 
@@ -65,5 +107,8 @@ func main(){
     client := pb.NewRestaurantClient(conn)
     pos := NewPos(client)
     pos.makeOrder()
+    pos.updateOrderStatus()
     pos.listOrderStatus()
+    pos.getOrderDishes()
+    pos.getLastOrder()
 }

@@ -8,6 +8,7 @@ import (
 	"net"
 	"strconv"
 	"strings"
+	"time"
 
 	pb "github.com/Tyulenb/order-kitchen/proto"
 	"github.com/redis/go-redis/v9"
@@ -15,41 +16,41 @@ import (
 )
 
 type Restaurant struct {
-    lastOrder uint //autoincrementing order id
-    orderToCook uint //next to cook order
     pb.UnimplementedRestaurantServer
     rbd *redis.Client
 }
 
 func NewRestaurant(rbd *redis.Client) *Restaurant {
     return &Restaurant{
-        lastOrder: 0,
-        orderToCook: 0,
-        rbd: rbd,
+       rbd: rbd,
     }
 }
 
 func (r *Restaurant) CreateOrder(stream pb.Restaurant_CreateOrderServer) error {
-    id := strconv.FormatUint(uint64(r.lastOrder), 10)
     ctx := context.Background()
+    id, err := r.rbd.Incr(ctx, "OrderId").Result()
+    if err != nil {
+        return err
+    }
+
     dishes := make(map[string]string)
     for {
         req, err := stream.Recv()
         if err == io.EOF {
-            err := r.rbd.HSet(ctx, "order:"+id, "status", "Is Cooking").Err()
+            err := r.rbd.HSet(ctx, fmt.Sprintf("order:%d", id), "status", "Is Cooking").Err()
             if err != nil {
                 return err
             }
-            err = r.rbd.HSet(ctx, fmt.Sprintf("order:%s:dishes", id), dishes, ).Err()
+            err = r.rbd.HSet(ctx, fmt.Sprintf("order:%d:dishes", id), dishes, ).Err()
             if err != nil {
                 return err
             }
-            return stream.SendAndClose(&pb.OrderId{Id: id})
+            return stream.SendAndClose(&pb.OrderId{Id: strconv.FormatInt(id, 10)})
         }
         if err != nil {
             return err 
         }
-        dishes[req.DishName] = string(req.Amount)
+        dishes[req.DishName] = strconv.Itoa(int(req.Amount))
     }
 }
 
@@ -68,6 +69,7 @@ func (r *Restaurant) ListOrderStatus(empty *pb.Empty, stream pb.Restaurant_ListO
             break
         }
     }
+    //Remove "order:id:dishes
     for i := range orders {
         parts := strings.Split(orders[i], ":")
         if len(parts) > 2 {
@@ -81,6 +83,64 @@ func (r *Restaurant) ListOrderStatus(empty *pb.Empty, stream pb.Restaurant_ListO
     }
     return nil
 }
+
+func (r *Restaurant) UpdateOrderStatus(ctx context.Context, osi *pb.OrderStatusId) (*pb.OrderId, error) {
+    err := r.rbd.HSet(ctx, fmt.Sprintf("order:%s", osi.Id), "status", osi.Status).Err()
+    if err != nil {
+        return nil, err
+    }
+    return &pb.OrderId{Id: osi.Id}, nil
+}
+
+func (r *Restaurant) GetLastOrder(ctx context.Context, empty *pb.Empty) (*pb.OrderId, error) {
+    lastOrder, err := r.rbd.Get(ctx, "lastOrder").Result()
+    if err != nil {
+        return nil, err
+    }
+    orderId, err := r.rbd.Get(ctx, "OrderId").Result()
+    if err != nil {
+        return nil, err
+    }
+
+    if lastOrder >= orderId {
+        return &pb.OrderId{Id: fmt.Sprint(lastOrder)}, nil
+    }
+    order, err := r.rbd.Incr(ctx, "lastOrder").Result()
+    if err != nil {
+        return nil, err
+    }
+    
+    return &pb.OrderId{Id: fmt.Sprint(order)}, nil
+}
+
+func (r *Restaurant) GetOrderDishes(order *pb.OrderId, stream pb.Restaurant_GetOrderDishesServer) error {
+    id := order.GetId()
+    dishes, err := r.rbd.HGetAll(context.Background(), fmt.Sprintf("order:%s:dishes", id)).Result()
+    if err != nil {
+        return err
+    }
+    for k, v := range dishes {
+        amount, err := strconv.ParseInt(v, 10, 32)
+        if err != nil {
+            return err
+        }
+        stream.Send(&pb.OrderDishes{DishName: k, Amount: int32(amount)})
+    }
+    return nil 
+}
+
+func (r *Restaurant) GetOrderStatus(ctx context.Context, orderId *pb.OrderId) (*pb.OrderStatus, error) {
+    ctx, cancel := context.WithTimeout(context.Background(), time.Second * 5)
+    defer cancel()
+
+    status, err := r.rbd.HGetAll(ctx, fmt.Sprintf("order:%s", orderId.Id)).Result()
+    if err != nil {
+        return nil, err
+    } 
+
+    return &pb.OrderStatus{Status: status["status"]}, nil
+}
+
 
 func main() {
     lis, err := net.Listen("tcp", ":50051")

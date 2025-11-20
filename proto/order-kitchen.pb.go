@@ -264,14 +264,15 @@ const file_order_kitchen_proto_rawDesc = "" +
 	"\x06status\x18\x02 \x01(\tR\x06status\"%\n" +
 	"\vOrderStatus\x12\x16\n" +
 	"\x06status\x18\x01 \x01(\tR\x06status\"\a\n" +
-	"\x05Empty2\xa5\x02\n" +
+	"\x05Empty2\xdd\x02\n" +
 	"\n" +
 	"Restaurant\x125\n" +
 	"\vCreateOrder\x12\x12.proto.OrderDishes\x1a\x0e.proto.OrderId\"\x00(\x01\x129\n" +
 	"\x0fListOrderStatus\x12\f.proto.Empty\x1a\x14.proto.OrderStatusId\"\x000\x01\x12;\n" +
-	"\x11UpdateOrderStatus\x12\x0e.proto.OrderId\x1a\x14.proto.OrderStatusId\"\x00\x12.\n" +
+	"\x11UpdateOrderStatus\x12\x14.proto.OrderStatusId\x1a\x0e.proto.OrderId\"\x00\x12.\n" +
 	"\fGetLastOrder\x12\f.proto.Empty\x1a\x0e.proto.OrderId\"\x00\x128\n" +
-	"\x0eGetOrderDishes\x12\x0e.proto.OrderId\x1a\x12.proto.OrderDishes\"\x000\x01B\"Z github.com/Tyulenb/order-kitchenb\x06proto3"
+	"\x0eGetOrderDishes\x12\x0e.proto.OrderId\x1a\x12.proto.OrderDishes\"\x000\x01\x126\n" +
+	"\x0eGetOrderStatus\x12\x0e.proto.OrderId\x1a\x12.proto.OrderStatus\"\x00B\"Z github.com/Tyulenb/order-kitchenb\x06proto3"
 
 var (
 	file_order_kitchen_proto_rawDescOnce sync.Once
@@ -296,16 +297,18 @@ var file_order_kitchen_proto_goTypes = []any{
 var file_order_kitchen_proto_depIdxs = []int32{
 	0, // 0: proto.Restaurant.CreateOrder:input_type -> proto.OrderDishes
 	4, // 1: proto.Restaurant.ListOrderStatus:input_type -> proto.Empty
-	1, // 2: proto.Restaurant.UpdateOrderStatus:input_type -> proto.OrderId
+	2, // 2: proto.Restaurant.UpdateOrderStatus:input_type -> proto.OrderStatusId
 	4, // 3: proto.Restaurant.GetLastOrder:input_type -> proto.Empty
 	1, // 4: proto.Restaurant.GetOrderDishes:input_type -> proto.OrderId
-	1, // 5: proto.Restaurant.CreateOrder:output_type -> proto.OrderId
-	2, // 6: proto.Restaurant.ListOrderStatus:output_type -> proto.OrderStatusId
-	2, // 7: proto.Restaurant.UpdateOrderStatus:output_type -> proto.OrderStatusId
-	1, // 8: proto.Restaurant.GetLastOrder:output_type -> proto.OrderId
-	0, // 9: proto.Restaurant.GetOrderDishes:output_type -> proto.OrderDishes
-	5, // [5:10] is the sub-list for method output_type
-	0, // [0:5] is the sub-list for method input_type
+	1, // 5: proto.Restaurant.GetOrderStatus:input_type -> proto.OrderId
+	1, // 6: proto.Restaurant.CreateOrder:output_type -> proto.OrderId
+	2, // 7: proto.Restaurant.ListOrderStatus:output_type -> proto.OrderStatusId
+	1, // 8: proto.Restaurant.UpdateOrderStatus:output_type -> proto.OrderId
+	1, // 9: proto.Restaurant.GetLastOrder:output_type -> proto.OrderId
+	0, // 10: proto.Restaurant.GetOrderDishes:output_type -> proto.OrderDishes
+	3, // 11: proto.Restaurant.GetOrderStatus:output_type -> proto.OrderStatus
+	6, // [6:12] is the sub-list for method output_type
+	0, // [0:6] is the sub-list for method input_type
 	0, // [0:0] is the sub-list for extension type_name
 	0, // [0:0] is the sub-list for extension extendee
 	0, // [0:0] is the sub-list for field type_name
