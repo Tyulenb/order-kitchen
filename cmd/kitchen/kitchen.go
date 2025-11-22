@@ -4,10 +4,13 @@ import (
 	"context"
 	"io"
 	"log"
+	"strconv"
 	"strings"
 	"time"
 
 	pb "github.com/Tyulenb/order-kitchen/proto"
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials/insecure"
 )
 
 type Kitchen struct {
@@ -62,11 +65,39 @@ func (k *Kitchen) SimulateCooking(id string) {
     
 }
 
-func cooker(order chan string) {
+func cooker(order chan string, k *Kitchen) {
     for i := range order {   
-
+        k.SimulateCooking(i) 
     }
 }
 
 func main() {
+    const numCookers = 5
+
+    conn, err := grpc.NewClient("localhost:50051", grpc.WithTransportCredentials(insecure.NewCredentials()))
+    if err != nil {
+        log.Fatal("did not connect:", err)
+    }
+    defer conn.Close()
+    client := pb.NewRestaurantClient(conn)
+    kitchen := NewKitchen(client)
+
+    order := make(chan string, 5)
+    for range numCookers {
+        go cooker(order, kitchen)
+    }
+
+    prev_order := "" 
+    ctx := context.Background()
+    for {
+        lorder, err := kitchen.client.GetLastOrder(ctx, &pb.Empty{})
+        if err != nil {
+            continue
+        }
+        if lorder.Id != prev_order {
+            order <- lorder.Id
+            prev_order = lorder.Id
+        }
+    }
 }
+
