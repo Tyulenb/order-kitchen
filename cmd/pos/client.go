@@ -2,7 +2,6 @@ package main
 
 import (
 	"context"
-	"fmt"
 	"io"
 	"log"
 	"time"
@@ -54,7 +53,7 @@ func (p *PoS) listOrderStatus() {
             break
         }
         if err != nil {
-            log.Fatal(err)
+            log.Fatalf("listOrderStatus, stream receive %v", err)
         }
         log.Println(statusId.Id, statusId.Status)
     }
@@ -64,7 +63,7 @@ func (p *PoS) updateOrderStatus () {
     ctx := context.Background()
     r, err := p.client.UpdateOrderStatus(ctx, &pb.OrderStatusId{Id: "1", Status: "Canceled"})
     if err != nil {
-        log.Fatal(err)
+        log.Fatalf("updateOrderStatus %v", err)
     }
     log.Println(r)
 }
@@ -73,7 +72,7 @@ func (p *PoS) getLastOrder() {
     ctx := context.Background()
     r, err := p.client.GetLastOrder(ctx, &pb.Empty{})
     if err != nil {
-        log.Fatal(err)
+        log.Fatalf("getLastOrder %v", err)
     }
     log.Println(r)
 }
@@ -88,11 +87,10 @@ func (p *PoS) getOrderDishes() {
     for {
         orderDish, err := stream.Recv()
         if err == io.EOF {
-            fmt.Println("End dishes sream")
             break
         }
         if err != nil {
-            log.Fatal(err)
+            log.Fatalf("getLastOrder %v", err)
         }
         log.Println(orderDish)
     }

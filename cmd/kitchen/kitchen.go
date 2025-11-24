@@ -2,9 +2,9 @@ package main
 
 import (
 	"context"
+	"fmt"
 	"io"
 	"log"
-	"strconv"
 	"strings"
 	"time"
 
@@ -22,8 +22,11 @@ func NewKitchen(client pb.RestaurantClient) *Kitchen {
 }
 
 func (k *Kitchen) SimulateCooking(id string) {
+    log.Printf("Start cooking %v\n", id)
     timeToCook := 0
     timeList := make(map[string]int, 0)
+    timeList["Scrambled eggs"] = 10 
+    timeList["Orange juice"] = 5
 
     ctx := context.Background() 
     orderId := &pb.OrderId{Id: id}
@@ -42,12 +45,13 @@ func (k *Kitchen) SimulateCooking(id string) {
         timeToCook += timeList[dishes.DishName] * int(dishes.Amount)
     }
 
-    timeout := time.After(time.Duration(timeToCook))
+    timeout := time.After(time.Duration(timeToCook)*time.Second)
     statusChecker := time.NewTicker(time.Second*5)
     for {
         select {
         case <- timeout:
             _, err := k.client.UpdateOrderStatus(ctx, &pb.OrderStatusId{Id: id, Status: "Cooked"})
+            fmt.Println("GOTOVO!")
             if err != nil {
                 log.Fatalf("SimulateCooking, UpdateOrderStatus error: %v\n", err)
             }
@@ -58,6 +62,7 @@ func (k *Kitchen) SimulateCooking(id string) {
                 log.Fatalf("SimulateCooking, GetOrderStatus error: %v\n", err)
             }
             if strings.Compare(status.Status, "Canceled") == 0 {
+                log.Println("Order canceled")
                 return
             }
         }

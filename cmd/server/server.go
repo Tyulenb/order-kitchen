@@ -95,8 +95,19 @@ func (r *Restaurant) UpdateOrderStatus(ctx context.Context, osi *pb.OrderStatusI
 func (r *Restaurant) GetLastOrder(ctx context.Context, empty *pb.Empty) (*pb.OrderId, error) {
     lastOrder, err := r.rbd.Get(ctx, "lastOrder").Result()
     if err != nil {
-        return nil, err
+        if err != redis.Nil {
+            return nil, err
+        }
+        _, err := r.rbd.Incr(ctx, "lastOrder").Result()
+        if err != nil {
+            return nil, err
+        }
+        lastOrder, err = r.rbd.Get(ctx, "lastOrder").Result()
+        if err != nil {
+            return nil, err
+        }
     }
+
     orderId, err := r.rbd.Get(ctx, "OrderId").Result()
     if err != nil {
         return nil, err
