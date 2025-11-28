@@ -6,6 +6,7 @@ import (
 	"log"
 	"time"
 
+	"github.com/Tyulenb/order-kitchen/pos/internal/app"
 	pb "github.com/Tyulenb/order-kitchen/proto"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
@@ -96,7 +97,7 @@ func (p *PoS) getOrderDishes() {
     }
 }
 
-func main(){
+func main1(){
     conn, err := grpc.NewClient("localhost:50051", grpc.WithTransportCredentials(insecure.NewCredentials()))
     if err != nil {
         log.Fatal("did not connect:", err)
@@ -109,4 +110,6 @@ func main(){
     pos.listOrderStatus()
     pos.getOrderDishes()
     pos.getLastOrder()
+    ap := app.NewApp(":9999")
+    ap.Run()
 }
