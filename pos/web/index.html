@@ -4,8 +4,140 @@
         <meta charset="UTF-8">
         <title>McVkusno SIM</title>
         <script src="https://unpkg.com/htmx.org@1.9.4"></script>
+        <style>
+            * {
+                box-sizing: border-box;
+            }
+
+            body, html {
+                margin: 0;
+                padding: 0;
+                height: 100%;
+            }
+
+            .container {
+                display: flex;
+                height: 100vh;
+            }
+
+            .left {
+                width: 50%;
+                padding: 20px;
+            }
+
+            .border {
+                width: 5px;
+                background-color: lightgray;
+            }
+
+            .right {
+                display: flex;
+                flex-direction: column;
+                width: 50%;
+            }
+
+            .top {
+                flex: 1;
+                padding: 20px;
+            }
+
+            .border-horizontal {
+                height: 5px;
+                background-color: lightgray;
+            }
+
+            .bottom {
+                flex: 1; 
+                padding: 20px;
+            }
+            .product {
+                border: 1px solid #ccc;
+                padding: 20px;
+                margin: 10px;
+                display: flex;
+                align-items: center;
+            }
+            .product img {
+                width: 100px;
+                height: 100px;
+                margin-right: 20px;
+            }
+            .controls {
+                display: flex;
+                align-items: center;
+                margin-left: auto;
+            }
+            .controls button {
+                padding: 5px 10px;
+                margin: 0 5px;
+            }
+        </style>
     </head>
     <body>
-        <h1>Menu</h1>
+        <div class="container">
+            <div class="left">
+                <h1>Menu</h1>
+                <form id="product-form" hx-post="/submit" hx-target="#response">
+                    <div class="product">
+                        <img src="product1.jpg" alt="Cheeseburger">
+                        <h3>Cheeseburger</h3>
+                        <div class="controls">
+                            <button type="button" onclick="adjustQuantity('quantity1', -1)">-</button>
+                            <input type="hidden" id="quantity1" name="quantity1" value="0">
+                            <span id="displayQuantity1">0</span>
+                            <button type="button" onclick="adjustQuantity('quantity1', 1)">+</button>
+                        </div>
+                    </div>
+
+                    <div class="product">
+                        <img src="product2.jpg" alt="French Fries">
+                        <h3>French Fries</h3>
+                        <div class="controls">
+                            <button type="button" onclick="adjustQuantity('quantity2', -1)">-</button>
+                            <input type="hidden" id="quantity2" name="quantity2" value="0">
+                            <span id="displayQuantity2">0</span>
+                            <button type="button" onclick="adjustQuantity('quantity2', 1)">+</button>
+                        </div>
+                    </div>
+
+                    <div class="product">
+                        <img src="product3.jpg" alt="Cola">
+                        <h3>Cola</h3>
+                        <div class="controls">
+                            <button type="button" onclick="adjustQuantity('quantity3', -1)">-</button>
+                            <input type="hidden" id="quantity3" name="quantity3" value="0">
+                            <span id="displayQuantity3">0</span>
+                            <button type="button" onclick="adjustQuantity('quantity3', 1)">+</button>
+                        </div>
+                    </div>
+
+                    <button type="submit">Make an order!</button>
+                </form>
+
+                <script>
+                function adjustQuantity(quantityId, change) {
+                    const qtySpan = document.getElementById(quantityId);
+                    const displaySpan = document.getElementById('display' + quantityId.charAt(0).toUpperCase() + quantityId.slice(1));
+                    let currentValue = parseInt(qtySpan.value);
+
+                    currentValue = Math.max(0, currentValue + change);
+                    qtySpan.value = currentValue;
+                    displaySpan.textContent = currentValue;
+                }
+                </script>
+            </div>
+
+            <div class="border"></div>
+
+            <div class="right">
+                <div class="top">
+                    <h1>COOKING</h1>
+                </div>
+                <div class="border-horizontal"></div>
+                <div class="bottom">
+                    <h1>READY</h1>
+                </div>
+            </div>
+        </div>
     </body>
 </html>
