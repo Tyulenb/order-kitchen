@@ -1,4 +1,4 @@
-package main
+package service 
 
 import (
 	"context"
@@ -6,44 +6,45 @@ import (
 	"log"
 	"time"
 
-	"github.com/Tyulenb/order-kitchen/pos/internal/app"
 	pb "github.com/Tyulenb/order-kitchen/proto"
-	"google.golang.org/grpc"
-	"google.golang.org/grpc/credentials/insecure"
 )
 
-type PoS struct {
+type Service struct {
     client pb.RestaurantClient
 }
 
-func NewPos(client pb.RestaurantClient) *PoS {
-    return &PoS{client: client}
+func NewService(client pb.RestaurantClient) *Service {
+    return &Service{client: client}
 }
 
-func (p *PoS) makeOrder() {
+func (s *Service) MakeOrder(cb, ff, cl int32) error{
     ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
     defer cancel()
+
     order := make([]*pb.OrderDishes, 0)
-    order = append(order, &pb.OrderDishes{DishName: "Scrambled eggs", Amount: 1})
-    order = append(order, &pb.OrderDishes{DishName: "Orange juice", Amount: 1})
-    stream, err := p.client.CreateOrder(ctx)
+    order = append(order, &pb.OrderDishes{DishName: "Cheesebureger", Amount: cb})
+    order = append(order, &pb.OrderDishes{DishName: "French Fries", Amount: ff})
+    order = append(order, &pb.OrderDishes{DishName: "Cola", Amount: cl})
+
+    stream, err := s.client.CreateOrder(ctx)
     if err != nil {
-        log.Fatalf("stream, %v", err)
+        return err
     }
     for _, v := range order {
         stream.Send(v)
     }
     response, err := stream.CloseAndRecv()
     if err != nil {
-        log.Fatalf("Close stream, %v", err)
+        return err
     }
     log.Println(response.Id)
+    return nil
 }
 
-func (p *PoS) listOrderStatus() {
+func (s *Service) ListOrderStatus() {
     ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
     defer cancel()
-    stream, err := p.client.ListOrderStatus(ctx, &pb.Empty{})
+    stream, err := s.client.ListOrderStatus(ctx, &pb.Empty{})
     if err != nil {
         log.Fatalf("listOrderStatus, open stream, %v", err)
         return
@@ -60,28 +61,28 @@ func (p *PoS) listOrderStatus() {
     }
 }
 
-func (p *PoS) updateOrderStatus () {
+func (s *Service) UpdateOrderStatus () {
     ctx := context.Background()
-    r, err := p.client.UpdateOrderStatus(ctx, &pb.OrderStatusId{Id: "1", Status: "Canceled"})
+    r, err := s.client.UpdateOrderStatus(ctx, &pb.OrderStatusId{Id: "1", Status: "Canceled"})
     if err != nil {
         log.Fatalf("updateOrderStatus %v", err)
     }
     log.Println(r)
 }
 
-func (p *PoS) getLastOrder() {
+func (s *Service) GetLastOrder() {
     ctx := context.Background()
-    r, err := p.client.GetLastOrder(ctx, &pb.Empty{})
+    r, err := s.client.GetLastOrder(ctx, &pb.Empty{})
     if err != nil {
         log.Fatalf("getLastOrder %v", err)
     }
     log.Println(r)
 }
 
-func (p *PoS) getOrderDishes() {
+func (s *Service) GetOrderDishes() {
     ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
     defer cancel()
-    stream, err := p.client.GetOrderDishes(ctx, &pb.OrderId{Id: "1"})
+    stream, err := s.client.GetOrderDishes(ctx, &pb.OrderId{Id: "1"})
     if err != nil {
         log.Fatal(err)
     }
@@ -95,21 +96,4 @@ func (p *PoS) getOrderDishes() {
         }
         log.Println(orderDish)
     }
-}
-
-func main1(){
-    conn, err := grpc.NewClient("localhost:50051", grpc.WithTransportCredentials(insecure.NewCredentials()))
-    if err != nil {
-        log.Fatal("did not connect:", err)
-    }
-    defer conn.Close()
-    client := pb.NewRestaurantClient(conn)
-    pos := NewPos(client)
-    pos.makeOrder()
-    pos.updateOrderStatus()
-    pos.listOrderStatus()
-    pos.getOrderDishes()
-    pos.getLastOrder()
-    ap := app.NewApp(":9999")
-    ap.Run()
 }

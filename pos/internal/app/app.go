@@ -4,7 +4,11 @@ import (
 	"log"
 	"net/http"
 
+	"github.com/Tyulenb/order-kitchen/pos/internal/service"
 	"github.com/Tyulenb/order-kitchen/pos/internal/transport"
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials/insecure"
+	pb "github.com/Tyulenb/order-kitchen/proto"
 )
 
 type App struct {
@@ -19,8 +23,16 @@ func NewApp(port string) *App {
 
 func (a *App) Run() error{
     router := http.NewServeMux()
+    
+    conn, err := grpc.NewClient("localhost:50051", grpc.WithTransportCredentials(insecure.NewCredentials()))
+    if err != nil {
+        return err
+    }
+    client := pb.NewRestaurantClient(conn)
 
-    tr := transport.NewTransport()
+    sr := service.NewService(client)
+
+    tr := transport.NewTransport(sr)
     tr.RegisterRoutes(router)
     server := &http.Server{
         Addr: a.Port,
