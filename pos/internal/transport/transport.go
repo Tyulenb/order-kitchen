@@ -21,6 +21,8 @@ func NewTransport(srv *service.Service) *Transport {
 func (t *Transport) RegisterRoutes(router *http.ServeMux) {
     router.Handle("/", http.FileServer(http.Dir("pos/web")))
     router.HandleFunc("POST /order", t.makeOrder)
+    router.HandleFunc("GET /cookingOrders", t.cookingOrders)
+    router.HandleFunc("GET /readyOrders", t.readyOrders)
 }
 
 func (t *Transport) makeOrder(w http.ResponseWriter, r *http.Request) {
@@ -43,4 +45,28 @@ func (t *Transport) makeOrder(w http.ResponseWriter, r *http.Request) {
         return
     }
     */
+}
+
+func (t *Transport) readyOrders(w http.ResponseWriter, r *http.Request) {
+    cooked, err := t.srv.ListReadyOrders()
+    if err != nil {
+        http.Error(w, "Something went wrong", 400)
+        log.Println(err)
+        return
+    }
+    for i := range cooked {
+        fmt.Fprintln(w, cooked[i])
+    }
+}
+
+func (t *Transport) cookingOrders(w http.ResponseWriter, r *http.Request) {
+    cooking, err := t.srv.ListCookingOrders()
+    if err != nil {
+        http.Error(w, "Something went wrong", 400)
+        log.Println(err)
+        return
+    }
+    for i := range cooking {
+        fmt.Fprintln(w, cooking[i])
+    }
 }

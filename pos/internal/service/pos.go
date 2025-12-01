@@ -1,9 +1,10 @@
-package service 
+package service
 
 import (
 	"context"
 	"io"
 	"log"
+	"strings"
 	"time"
 
 	pb "github.com/Tyulenb/order-kitchen/proto"
@@ -41,13 +42,14 @@ func (s *Service) MakeOrder(cb, ff, cl int32) error{
     return nil
 }
 
-func (s *Service) ListOrderStatus() {
+//If param == "" returns all orders without filtering
+func (s *Service) listOrderStatus(param string) ([]*pb.OrderStatusId, error) {
     ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
     defer cancel()
+    orders := make([]*pb.OrderStatusId, 0)
     stream, err := s.client.ListOrderStatus(ctx, &pb.Empty{})
     if err != nil {
-        log.Fatalf("listOrderStatus, open stream, %v", err)
-        return
+        return nil, err
     }
     for {
         statusId, err := stream.Recv()
@@ -55,10 +57,47 @@ func (s *Service) ListOrderStatus() {
             break
         }
         if err != nil {
-            log.Fatalf("listOrderStatus, stream receive %v", err)
+            return nil, err
         }
-        log.Println(statusId.Id, statusId.Status)
+        if statusId != nil { 
+            orders = append(orders, statusId)
+        }
     }
+
+    if param == "" {
+        return orders, nil
+    }
+    filtred := make([]*pb.OrderStatusId, 0)
+    for i := range orders {
+        if strings.Compare(orders[i].GetStatus(), param) == 0 {
+            filtred = append(filtred, orders[i])
+        }
+    }
+    return filtred, nil
+}
+
+func (s *Service) ListCookingOrders() ([]string, error) {
+    orders, err := s.listOrderStatus("Cooking")
+    if err != nil {
+        return nil, err
+    }
+    cooking := make([]string, 0)
+    for i := range orders {
+        cooking = append(cooking, orders[i].Id)
+    }
+    return cooking, nil
+}
+
+func (s *Service) ListReadyOrders() ([]string, error) {
+    orders, err := s.listOrderStatus("Cooked")
+    if err != nil {
+        return nil, err
+    }
+    cooked := make([]string, 0)
+    for i := range orders {
+        cooked = append(cooked, orders[i].Id)
+    }
+    return cooked, nil
 }
 
 func (s *Service) UpdateOrderStatus () {
