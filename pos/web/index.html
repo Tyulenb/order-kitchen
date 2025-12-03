@@ -63,11 +63,17 @@
             <div class="border"></div>
 
             <div class="right">
-                <div class="top">
+                <div class="top" 
+                    hx-get="/cookingOrders"
+                    hx-trigger="every 1s"
+                    hx-swap="beforeend">
                     <h1>COOKING</h1>
                 </div>
                 <div class="border-horizontal"></div>
-                <div class="bottom">
+                <div class="bottom"
+                    hx-get="/readyOrders"
+                    hx-trigger="every 1s"
+                    hx-swap="beforeend">
                     <h1>READY</h1>
                 </div>
             </div>
