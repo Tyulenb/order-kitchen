@@ -37,7 +37,7 @@ func (r *Restaurant) CreateOrder(stream pb.Restaurant_CreateOrderServer) error {
     for {
         req, err := stream.Recv()
         if err == io.EOF {
-            err := r.rbd.HSet(ctx, fmt.Sprintf("order:%d", id), "status", "Is Cooking").Err()
+            err := r.rbd.HSet(ctx, fmt.Sprintf("order:%d", id), "status", "Cooking").Err()
             if err != nil {
                 return err
             }

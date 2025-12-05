@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"strconv"
 
 	"github.com/Tyulenb/order-kitchen/pos/internal/service"
 )
@@ -33,18 +34,31 @@ func (t *Transport) makeOrder(w http.ResponseWriter, r *http.Request) {
         log.Println(err)
         return
     }
-    chsBurg_str := r.FormValue("quantity1")
-    frFries_str := r.FormValue("quantity2")
-    cola_str := r.FormValue("quantity3")
-    fmt.Println(chsBurg_str, frFries_str, cola_str) 
-    /*
-    err = t.srv.MakeOrder(chsBurg, frFries, cola)
+    chsBurg, err := strconv.ParseInt(r.FormValue("quantity1"), 10, 32)
     if err != nil {
         http.Error(w, "Something went wrong", 400)
         log.Println(err)
         return
     }
-    */
+    frFries, err := strconv.ParseInt(r.FormValue("quantity2"), 10, 32)
+    if err != nil {
+        http.Error(w, "Something went wrong", 400)
+        log.Println(err)
+        return
+    }
+    cola, err := strconv.ParseInt(r.FormValue("quantity3"), 10, 32)
+    if err != nil {
+        http.Error(w, "Something went wrong", 400)
+        log.Println(err)
+        return
+    }
+    fmt.Println(chsBurg, frFries, cola) 
+    err = t.srv.MakeOrder(int32(chsBurg), int32(frFries), int32(cola))
+    if err != nil {
+        http.Error(w, "Something went wrong", 400)
+        log.Println(err)
+        return
+    }
 }
 
 func (t *Transport) readyOrders(w http.ResponseWriter, r *http.Request) {

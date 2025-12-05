@@ -25,8 +25,9 @@ func (k *Kitchen) SimulateCooking(id string) {
     log.Printf("Start cooking %v\n", id)
     timeToCook := 0
     timeList := make(map[string]int, 0)
-    timeList["Scrambled eggs"] = 10 
-    timeList["Orange juice"] = 5
+    timeList["Cheeseburger"] = 20 
+    timeList["French Fries"] = 15
+    timeList["Cola"] = 10
 
     ctx := context.Background() 
     orderId := &pb.OrderId{Id: id}

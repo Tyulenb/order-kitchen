@@ -23,7 +23,7 @@ func (s *Service) MakeOrder(cb, ff, cl int32) error{
     defer cancel()
 
     order := make([]*pb.OrderDishes, 0)
-    order = append(order, &pb.OrderDishes{DishName: "Cheesebureger", Amount: cb})
+    order = append(order, &pb.OrderDishes{DishName: "Cheeseburger", Amount: cb})
     order = append(order, &pb.OrderDishes{DishName: "French Fries", Amount: ff})
     order = append(order, &pb.OrderDishes{DishName: "Cola", Amount: cl})
 
