@@ -30,33 +30,28 @@ func (t *Transport) makeOrder(w http.ResponseWriter, r *http.Request) {
     log.Println("makeOrder")
     err := r.ParseForm()
     if err != nil {
-        http.Error(w, "Something went wrong", 400)
-        log.Println(err)
+        smthWentWrong(w, err)
         return
     }
     chsBurg, err := strconv.ParseInt(r.FormValue("quantity1"), 10, 32)
     if err != nil {
-        http.Error(w, "Something went wrong", 400)
-        log.Println(err)
+        smthWentWrong(w, err)
         return
     }
     frFries, err := strconv.ParseInt(r.FormValue("quantity2"), 10, 32)
     if err != nil {
-        http.Error(w, "Something went wrong", 400)
-        log.Println(err)
+        smthWentWrong(w, err)
         return
     }
     cola, err := strconv.ParseInt(r.FormValue("quantity3"), 10, 32)
     if err != nil {
-        http.Error(w, "Something went wrong", 400)
-        log.Println(err)
+        smthWentWrong(w, err)
         return
     }
     fmt.Println(chsBurg, frFries, cola) 
     err = t.srv.MakeOrder(int32(chsBurg), int32(frFries), int32(cola))
     if err != nil {
-        http.Error(w, "Something went wrong", 400)
-        log.Println(err)
+        smthWentWrong(w, err)
         return
     }
 }
@@ -64,8 +59,7 @@ func (t *Transport) makeOrder(w http.ResponseWriter, r *http.Request) {
 func (t *Transport) readyOrders(w http.ResponseWriter, r *http.Request) {
     cooked, err := t.srv.ListReadyOrders()
     if err != nil {
-        http.Error(w, "Something went wrong", 400)
-        log.Println(err)
+        smthWentWrong(w, err)
         return
     }
     for i := range cooked {
@@ -76,11 +70,15 @@ func (t *Transport) readyOrders(w http.ResponseWriter, r *http.Request) {
 func (t *Transport) cookingOrders(w http.ResponseWriter, r *http.Request) {
     cooking, err := t.srv.ListCookingOrders()
     if err != nil {
-        http.Error(w, "Something went wrong", 400)
-        log.Println(err)
+        smthWentWrong(w, err)
         return
     }
     for i := range cooking {
         fmt.Fprintln(w, cooking[i])
     }
+}
+
+func smthWentWrong(w http.ResponseWriter, err error) {
+    http.Error(w, "Something went wrong", 400)
+    log.Println(err)
 }
