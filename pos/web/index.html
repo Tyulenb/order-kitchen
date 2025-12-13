@@ -66,15 +66,19 @@
                 <div class="top" 
                     hx-get="/cookingOrders"
                     hx-trigger="every 1s"
-                    hx-swap="beforeend">
+                    hx-swap="innerHTML"
+                    hx-target="#cooking">
                     <h1>COOKING</h1>
+                    <div id="cooking"></div>
                 </div>
                 <div class="border-horizontal"></div>
                 <div class="bottom"
                     hx-get="/readyOrders"
                     hx-trigger="every 1s"
-                    hx-swap="beforeend">
+                    hx-swap="innerHTML"
+                    hx-target="#cooked">
                     <h1>READY</h1>
+                    <div id="cooked"></div>
                 </div>
             </div>
         </div>

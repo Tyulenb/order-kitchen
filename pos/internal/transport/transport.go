@@ -62,9 +62,11 @@ func (t *Transport) readyOrders(w http.ResponseWriter, r *http.Request) {
         smthWentWrong(w, err)
         return
     }
+    var responseString string
     for i := range cooked {
-        fmt.Fprintln(w, cooked[i])
+        responseString += fmt.Sprintf(`<h2>Order№ %s</h2>`, cooked[i])
     }
+    fmt.Fprint(w, responseString)
 }
 
 func (t *Transport) cookingOrders(w http.ResponseWriter, r *http.Request) {
@@ -73,9 +75,11 @@ func (t *Transport) cookingOrders(w http.ResponseWriter, r *http.Request) {
         smthWentWrong(w, err)
         return
     }
+    var responseString string
     for i := range cooking {
-        fmt.Fprintln(w, cooking[i])
+        responseString += fmt.Sprintf(`<h2>Order№ %s</h2>`, cooking[i])
     }
+    fmt.Fprint(w, responseString)
 }
 
 func smthWentWrong(w http.ResponseWriter, err error) {
