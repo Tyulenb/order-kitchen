@@ -1,10 +1,10 @@
 package transport
 
 import (
+	"encoding/json"
 	"fmt"
 	"log"
 	"net/http"
-	"strconv"
 
 	"github.com/Tyulenb/order-kitchen/pos/internal/service"
 )
@@ -27,33 +27,31 @@ func (t *Transport) RegisterRoutes(router *http.ServeMux) {
 }
 
 func (t *Transport) makeOrder(w http.ResponseWriter, r *http.Request) {
-    log.Println("makeOrder")
-    err := r.ParseForm()
+
+    if r.Body == nil{
+        smthWentWrong(w, fmt.Errorf("The body is nil"))
+        return
+    }
+    defer r.Body.Close()
+
+    type Order struct {
+        QuantityBurger int 
+        QuantityFries int 
+        QuantityCola int 
+    }
+    var o Order
+    err := json.NewDecoder(r.Body).Decode(&o)
+    if err != nil {
+        smthWentWrong(w, err)
+        return 
+    }
+
+    err = t.srv.MakeOrder(int32(o.QuantityBurger), int32(o.QuantityFries), int32(o.QuantityCola))
     if err != nil {
         smthWentWrong(w, err)
         return
     }
-    chsBurg, err := strconv.ParseInt(r.FormValue("quantity1"), 10, 32)
-    if err != nil {
-        smthWentWrong(w, err)
-        return
-    }
-    frFries, err := strconv.ParseInt(r.FormValue("quantity2"), 10, 32)
-    if err != nil {
-        smthWentWrong(w, err)
-        return
-    }
-    cola, err := strconv.ParseInt(r.FormValue("quantity3"), 10, 32)
-    if err != nil {
-        smthWentWrong(w, err)
-        return
-    }
-    fmt.Println(chsBurg, frFries, cola) 
-    err = t.srv.MakeOrder(int32(chsBurg), int32(frFries), int32(cola))
-    if err != nil {
-        smthWentWrong(w, err)
-        return
-    }
+    log.Printf("Make Order: %d, %d, %d", o.QuantityBurger, o.QuantityFries, o.QuantityCola)
 }
 
 func (t *Transport) readyOrders(w http.ResponseWriter, r *http.Request) {

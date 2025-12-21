@@ -38,7 +38,7 @@ func (s *Service) MakeOrder(cb, ff, cl int32) error{
     if err != nil {
         return err
     }
-    log.Println(response.Id)
+    log.Printf("Order #%d was accepted\n", response.Id)
     return nil
 }
 

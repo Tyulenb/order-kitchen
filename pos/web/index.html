@@ -4,60 +4,45 @@
         <meta charset="UTF-8">
         <title>McVkusno SIM</title>
         <script src="https://unpkg.com/htmx.org@1.9.4"></script>
+        <script src="script.js"></script>
         <link rel="stylesheet" href="style.css">
     </head>
     <body>
         <div class="container">
             <div class="left">
                 <h1>Menu</h1>
-                <form id="product-form" hx-post="/order">
-                    <div class="product">
-                        <img src="images/cheeseburger.png" alt="Cheeseburger">
-                        <h3>Cheeseburger</h3>
-                        <div class="controls">
-                            <button type="button" onclick="adjustQuantity('quantity1', -1)">-</button>
-                            <input type="hidden" id="quantity1" name="quantity1" value="0">
-                            <span id="displayQuantity1">0</span>
-                            <button type="button" onclick="adjustQuantity('quantity1', 1)">+</button>
-                        </div>
+
+                <div class="product">
+                    <img src="images/cheeseburger.png" alt="Cheeseburger">
+                    <h3>Cheeseburger</h3>
+                    <div class="controls">
+                        <button type="button" onclick="adjustQuantity('quantityBurger', -1)">-</button>
+                        <span id="displayQuantityBurger">0</span>
+                        <button type="button" onclick="adjustQuantity('quantityBurger', 1)">+</button>
                     </div>
+                </div>
 
-                    <div class="product">
-                        <img src="images/french fries.jpg" alt="French Fries">
-                        <h3>French Fries</h3>
-                        <div class="controls">
-                            <button type="button" onclick="adjustQuantity('quantity2', -1)">-</button>
-                            <input type="hidden" id="quantity2" name="quantity2" value="0">
-                            <span id="displayQuantity2">0</span>
-                            <button type="button" onclick="adjustQuantity('quantity2', 1)">+</button>
-                        </div>
+                <div class="product">
+                    <img src="images/french_fries.jpg" alt="French Fries">
+                    <h3>French Fries</h3>
+                    <div class="controls">
+                        <button type="button" onclick="adjustQuantity('quantityFries', -1)">-</button>
+                        <span id="displayQuantityFries">0</span>
+                        <button type="button" onclick="adjustQuantity('quantityFries', 1)">+</button>
                     </div>
+                </div>
 
-                    <div class="product">
-                        <img src="images/cola.jpg" alt="Cola">
-                        <h3>Cola</h3>
-                        <div class="controls">
-                            <button type="button" onclick="adjustQuantity('quantity3', -1)">-</button>
-                            <input type="hidden" id="quantity3" name="quantity3" value="0">
-                            <span id="displayQuantity3">0</span>
-                            <button type="button" onclick="adjustQuantity('quantity3', 1)">+</button>
-                        </div>
+                <div class="product">
+                    <img src="images/cola.jpg" alt="Cola">
+                    <h3>Cola</h3>
+                    <div class="controls">
+                        <button type="button" onclick="adjustQuantity('quantityCola', -1)">-</button>
+                        <span id="displayQuantityCola">0</span>
+                        <button type="button" onclick="adjustQuantity('quantityCola', 1)">+</button>
                     </div>
+                </div>
 
-                    <button type="submit">Make an order!</button>
-                </form>
-
-                <script>
-                    function adjustQuantity(quantityId, change) {
-                        const qtySpan = document.getElementById(quantityId);
-                        const displaySpan = document.getElementById('display' + quantityId.charAt(0).toUpperCase() + quantityId.slice(1));
-                        let currentValue = parseInt(qtySpan.value);
-
-                        currentValue = Math.max(0, currentValue + change);
-                        qtySpan.value = currentValue;
-                        displaySpan.textContent = currentValue;
-                    }
-                </script>
+                <button id="orderButton" onclick="makeOrder()">Make an order!</button>
             </div>
 
             <div class="border"></div>
