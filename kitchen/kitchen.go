@@ -22,7 +22,7 @@ func NewKitchen(client pb.RestaurantClient) *Kitchen {
 }
 
 func (k *Kitchen) SimulateCooking(id string) {
-    log.Printf("Start cooking %v\n", id)
+    log.Printf("Start cooking Order#%v\n", id)
     timeToCook := 0
     timeList := make(map[string]int, 0)
     timeList["Cheeseburger"] = 20 
@@ -52,7 +52,7 @@ func (k *Kitchen) SimulateCooking(id string) {
         select {
         case <- timeout:
             _, err := k.client.UpdateOrderStatus(ctx, &pb.OrderStatusId{Id: id, Status: "Cooked"})
-            fmt.Println("GOTOVO!")
+            log.Printf("Order #%d was cooked\n", id)
             if err != nil {
                 log.Fatalf("SimulateCooking, UpdateOrderStatus error: %v\n", err)
             }
