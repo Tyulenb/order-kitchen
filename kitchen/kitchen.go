@@ -51,7 +51,7 @@ func (k *Kitchen) SimulateCooking(id string) {
         select {
         case <- timeout:
             _, err := k.client.UpdateOrderStatus(ctx, &pb.OrderStatusId{Id: id, Status: "Cooked"})
-            log.Printf("Order #%d was cooked\n", id)
+            log.Printf("Order #%s was cooked\n", id)
             if err != nil {
                 log.Fatalf("SimulateCooking, UpdateOrderStatus error: %v\n", err)
             }
@@ -79,7 +79,7 @@ func cooker(order chan string, k *Kitchen) {
 func main() {
     const numCookers = 5
 
-    conn, err := grpc.NewClient("localhost:50051", grpc.WithTransportCredentials(insecure.NewCredentials()))
+    conn, err := grpc.NewClient("server:50051", grpc.WithTransportCredentials(insecure.NewCredentials()))
     if err != nil {
         log.Fatal("did not connect:", err)
     }

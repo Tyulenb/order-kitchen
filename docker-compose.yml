@@ -1,0 +1,31 @@
+services:
+  redis:
+    image: "redis:latest"
+    ports:
+      - "6379:6379"
+
+  server:
+    build:
+      context: .
+      dockerfile: Dockerfile1
+    depends_on:
+      - redis
+    environment:
+      - REDIS_HOST=redis
+
+  kitchen:
+    build:
+      context: .
+      dockerfile: Dockerfile2
+    depends_on:
+      - server
+
+  pos:
+    build:
+      context: .
+      dockerfile: Dockerfile3
+    depends_on:
+      - server
+      - kitchen
+    ports:
+      - "9999:9999"

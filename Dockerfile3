@@ -1,0 +1,8 @@
+FROM golang:alpine
+
+COPY . /app
+WORKDIR /app
+
+RUN go build -o pofs pos/cmd/cmd.go
+
+CMD ["/app/pofs"]

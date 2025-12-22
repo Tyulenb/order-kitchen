@@ -24,7 +24,7 @@ func NewApp(port string) *App {
 func (a *App) Run() error{
     router := http.NewServeMux()
     
-    conn, err := grpc.NewClient("localhost:50051", grpc.WithTransportCredentials(insecure.NewCredentials()))
+    conn, err := grpc.NewClient("server:50051", grpc.WithTransportCredentials(insecure.NewCredentials()))
     if err != nil {
         return err
     }
