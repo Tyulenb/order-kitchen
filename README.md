@@ -1,7 +1,7 @@
 # Order-kitchen
 Fast Food Restaurant simulator.
 The main objective was to master gRPC and Redis while creating a functional application that mimics the operations of a fast food restaurant.
-![demo](link)
+![demo](https://github.com/Tyulenb/order-kitchen/blob/main/docs/demo.png)
 ## Technology Stack
 - gRPC: For efficient inter-service communication
 - Redis: Used as the database for storing order data
